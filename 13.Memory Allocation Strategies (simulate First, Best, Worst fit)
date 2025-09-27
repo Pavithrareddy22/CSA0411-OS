@@ -1,0 +1,14 @@
+/* mem_alloc_strategies.c
+   Compile: gcc mem_alloc_strategies.c -o mem_alloc_strategies
+   Simple simulation; free and allocate in a fixed memory array.
+*/
+#include <stdio.h>
+#include <string.h>
+
+#define MEMBLOCKS 10
+
+typedef struct { int size; int free; int id; } Block;
+
+void printBlocks(Block b[], int n){
+    printf("Blocks: idx size free id\n");
+    for(int i=0;i<n;i++) printf
