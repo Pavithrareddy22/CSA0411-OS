@@ -1,0 +1,93 @@
+/* two_level_dir.c
+   Simulate a two-level directory structure (users → files).
+   Compile: gcc two_level_dir.c -o two_level_dir
+*/
+#include <stdio.h>
+#include <string.h>
+
+#define MAX_USERS 20
+#define MAX_FILES 20
+
+typedef struct {
+    char name[64];
+    char files[MAX_FILES][64];
+    int file_count;
+    int used;
+} UserDir;
+
+UserDir users[MAX_USERS];
+
+int findUser(const char *u) {
+    for (int i = 0; i < MAX_USERS; i++)
+        if (users[i].used && strcmp(users[i].name, u) == 0)
+            return i;
+    return -1;
+}
+
+int createUser(const char *u) {
+    for (int i = 0; i < MAX_USERS; i++)
+        if (!users[i].used) {
+            users[i].used = 1;
+            strcpy(users[i].name, u);
+            users[i].file_count = 0;
+            return i;
+        }
+    return -1;
+}
+
+void createFile(const char *u, const char *f) {
+    int idx = findUser(u);
+    if (idx == -1)
+        idx = createUser(u);
+    if (idx == -1) {
+        printf("No space for more users!\n");
+        return;
+    }
+    if (users[idx].file_count == MAX_FILES) {
+        printf("User directory full!\n");
+        return;
+    }
+    strcpy(users[idx].files[users[idx].file_count++], f);
+    printf("Created file '%s' under user '%s'\n", f, u);
+}
+
+void listUser(const char *u) {
+    int idx = findUser(u);
+    if (idx == -1) {
+        printf("No such user.\n");
+        return;
+    }
+    printf("Files of user '%s':\n", u);
+    for (int i = 0; i < users[idx].file_count; i++)
+        printf(" %s\n", users[idx].files[i]);
+    if (users[idx].file_count == 0)
+        printf(" <empty>\n");
+}
+
+int main() {
+    int ch;
+    char u[64], f[64];
+
+    while (1) {
+        printf("\n1. Create file for user\n2. List files of user\n3. Exit\nChoice: ");
+        scanf("%d", &ch);
+        switch (ch) {
+        case 1:
+            printf("Enter user name: ");
+            scanf("%s", u);
+            printf("Enter file name: ");
+            scanf("%s", f);
+            createFile(u, f);
+            break;
+        case 2:
+            printf("Enter user name: ");
+            scanf("%s", u);
+            listUser(u);
+            break;
+        case 3:
+            return 0;
+        default:
+            printf("Invalid choice!\n");
+        }
+    }
+}
