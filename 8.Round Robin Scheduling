@@ -1,0 +1,34 @@
+/* round_robin.c
+   Compile: gcc round_robin.c -o round_robin
+*/
+#include <stdio.h>
+
+typedef struct {int pid, at, bt, rt, ct, wt, tat;} Proc;
+
+int main(){
+    int n, tq;
+    printf("Number of processes: "); scanf("%d",&n);
+    Proc p[n];
+    for(int i=0;i<n;i++){ p[i].pid=i+1;
+        printf("P%d arrival time burst time: ", i+1);
+        scanf("%d %d",&p[i].at,&p[i].bt);
+        p[i].rt = p[i].bt;
+    }
+    printf("Time quantum: "); scanf("%d",&tq);
+    int t=0, done=0;
+    while(done<n){
+        int progressed=0;
+        for(int i=0;i<n;i++){
+            if(p[i].rt>0 && p[i].at<=t){
+                int use = (p[i].rt>tq)?tq:p[i].rt;
+                p[i].rt -= use; t += use; progressed=1;
+                if(p[i].rt==0){ done++; p[i].ct = t; p[i].tat = p[i].ct - p[i].at; p[i].wt = p[i].tat - p[i].bt; }
+            }
+        }
+        if(!progressed) t++; // idle
+    }
+    printf("PID AT BT CT TAT WT\n");
+    for(int i=0;i<n;i++) printf("%3d %2d %2d %3d %3d %3d\n",
+        p[i].pid,p[i].at,p[i].bt,p[i].ct,p[i].tat,p[i].wt);
+    return 0;
+}
