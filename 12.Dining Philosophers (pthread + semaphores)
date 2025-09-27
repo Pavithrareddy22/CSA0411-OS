@@ -1,0 +1,44 @@
+/* dining_philosophers.c
+   Compile: gcc dining_philosophers.c -o dining_philosophers -lpthread -lrt
+*/
+#include <stdio.h>
+#include <pthread.h>
+#include <semaphore.h>
+#include <unistd.h>
+
+#define N 5
+sem_t forks[N];
+pthread_t phil[N];
+
+void *philosopher(void *arg){
+    int id = *(int*)arg;
+    while(1){
+        printf("Philosopher %d thinking\n", id);
+        sleep(1);
+        // pick forks in a safe order to avoid deadlock
+        if(id%2==0){
+            sem_wait(&forks[id]);
+            sem_wait(&forks[(id+1)%N]);
+        } else {
+            sem_wait(&forks[(id+1)%N]);
+            sem_wait(&forks[id]);
+        }
+        printf("Philosopher %d eating\n", id);
+        sleep(2);
+        sem_post(&forks[id]);
+        sem_post(&forks[(id+1)%N]);
+        printf("Philosopher %d finished eating\n", id);
+        sleep(1);
+    }
+    return NULL;
+}
+
+int main(){
+    int ids[N];
+    for(int i=0;i<N;i++) sem_init(&forks[i],0,1);
+    for(int i=0;i<N;i++){ ids[i]=i; pthread_create(&phil[i], NULL, philosopher, &ids[i]); }
+    // Let them run for a while
+    sleep(15);
+    printf("Stopping (main exits) -- in production you'd gracefully stop threads\n");
+    return 0;
+}
