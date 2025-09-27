@@ -1,14 +1,125 @@
 /* mem_alloc_strategies.c
+   Simulate First Fit, Best Fit, and Worst Fit memory allocation strategies.
    Compile: gcc mem_alloc_strategies.c -o mem_alloc_strategies
-   Simple simulation; free and allocate in a fixed memory array.
 */
 #include <stdio.h>
-#include <string.h>
 
-#define MEMBLOCKS 10
+#define MAX_BLOCKS 10
 
-typedef struct { int size; int free; int id; } Block;
+typedef struct {
+    int size;
+    int free; // 1 = free, 0 = allocated
+    int pid;  // which process occupies it
+} Block;
 
-void printBlocks(Block b[], int n){
-    printf("Blocks: idx size free id\n");
-    for(int i=0;i<n;i++) printf
+void printBlocks(Block b[], int n) {
+    printf("\nIdx  Size  Free  PID\n");
+    for (int i = 0; i < n; i++) {
+        printf("%3d %5d %5d %3d\n", i, b[i].size, b[i].free, b[i].pid);
+    }
+}
+
+int firstFit(Block b[], int n, int req, int pid) {
+    for (int i = 0; i < n; i++)
+        if (b[i].free && b[i].size >= req) {
+            b[i].free = 0;
+            b[i].pid = pid;
+            return i;
+        }
+    return -1;
+}
+
+int bestFit(Block b[], int n, int req, int pid) {
+    int best = -1;
+    for (int i = 0; i < n; i++)
+        if (b[i].free && b[i].size >= req) {
+            if (best == -1 || b[i].size < b[best].size)
+                best = i;
+        }
+    if (best != -1) {
+        b[best].free = 0;
+        b[best].pid = pid;
+    }
+    return best;
+}
+
+int worstFit(Block b[], int n, int req, int pid) {
+    int worst = -1;
+    for (int i = 0; i < n; i++)
+        if (b[i].free && b[i].size >= req) {
+            if (worst == -1 || b[i].size > b[worst].size)
+                worst = i;
+        }
+    if (worst != -1) {
+        b[worst].free = 0;
+        b[worst].pid = pid;
+    }
+    return worst;
+}
+
+void freeBlock(Block b[], int n, int idx) {
+    if (idx >= 0 && idx < n && b[idx].free == 0) {
+        b[idx].free = 1;
+        b[idx].pid = 0;
+        printf("Block %d freed.\n", idx);
+    } else {
+        printf("Invalid block index or already free.\n");
+    }
+}
+
+int main() {
+    Block blocks[MAX_BLOCKS] = {
+        {100,1,0},{500,1,0},{200,1,0},{300,1,0},{600,1,0},
+        {120,1,0},{50,1,0},{400,1,0},{250,1,0},{75,1,0}
+    };
+    int n = MAX_BLOCKS;
+    int choice, req, pid = 1, idx;
+
+    while (1) {
+        printf("\n---Memory Allocation Menu---\n");
+        printf("1. First Fit\n2. Best Fit\n3. Worst Fit\n4. Free Block\n5. Show Blocks\n6. Exit\nChoice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+        case 1:
+            printf("Enter process size: ");
+            scanf("%d", &req);
+            idx = firstFit(blocks, n, req, pid);
+            if (idx != -1)
+                printf("Allocated to block %d (PID %d)\n", idx, pid++);
+            else
+                printf("No suitable block found.\n");
+            break;
+        case 2:
+            printf("Enter process size: ");
+            scanf("%d", &req);
+            idx = bestFit(blocks, n, req, pid);
+            if (idx != -1)
+                printf("Allocated to block %d (PID %d)\n", idx, pid++);
+            else
+                printf("No suitable block found.\n");
+            break;
+        case 3:
+            printf("Enter process size: ");
+            scanf("%d", &req);
+            idx = worstFit(blocks, n, req, pid);
+            if (idx != -1)
+                printf("Allocated to block %d (PID %d)\n", idx, pid++);
+            else
+                printf("No suitable block found.\n");
+            break;
+        case 4:
+            printf("Enter block index to free: ");
+            scanf("%d", &idx);
+            freeBlock(blocks, n, idx);
+            break;
+        case 5:
+            printBlocks(blocks, n);
+            break;
+        case 6:
+            return 0;
+        default:
+            printf("Invalid choice.\n");
+        }
+    }
+}
