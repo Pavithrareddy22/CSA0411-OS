@@ -1,0 +1,25 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>      // for open()
+#include <unistd.h>     // for read(), write(), close()
+#include <sys/stat.h>   // for file permissions
+
+int main() {
+    int fd_src, fd_dest;
+    char buffer[1024];
+    ssize_t nread;
+
+    char src[100], dest[100];
+    printf("Enter source file name: ");
+    scanf("%s", src);
+    printf("Enter destination file name: ");
+    scanf("%s", dest);
+
+    // Open source file (read only)
+    fd_src = open(src, O_RDONLY);
+    if (fd_src < 0) {
+        perror("Error opening source file");
+        exit(1);
+    }
+
+    // Open destination file (create if
