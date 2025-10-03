@@ -1,0 +1,41 @@
+/* lru_paging.c
+   Simulate LRU page replacement using timestamps.
+   Compile: gcc lru_paging.c -o lru_paging
+*/
+#include <stdio.h>
+#include <limits.h>
+
+int main(){
+    int frames, n;
+    int ref[1000];
+    printf("Number of frames: "); scanf("%d",&frames);
+    printf("Number of references: "); scanf("%d",&n);
+    printf("Enter reference string:\n");
+    for(int i=0;i<n;i++) scanf("%d",&ref[i]);
+
+    int frame[frames], time[frames];
+    for(int i=0;i<frames;i++){ frame[i]=-1; time[i]=0; }
+    int t=0, faults=0;
+
+    for(int i=0;i<n;i++){
+        int page = ref[i]; t++;
+        int hit = -1;
+        for(int j=0;j<frames;j++) if(frame[j]==page) { hit = j; break; }
+        if(hit != -1){
+            time[hit] = t;
+        } else {
+            // find empty or least recently used
+            int lru = -1, minTime = INT_MAX;
+            for(int j=0;j<frames;j++){
+                if(frame[j] == -1){ lru = j; break; }
+                if(time[j] < minTime){ minTime = time[j]; lru = j; }
+            }
+            frame[lru] = page; time[lru] = t; faults++;
+        }
+        printf("Ref %d -> ", page);
+        for(int j=0;j<frames;j++) printf("%2d ", frame[j]);
+        printf("\n");
+    }
+    printf("Total page faults = %d\n", faults);
+    return 0;
+}
