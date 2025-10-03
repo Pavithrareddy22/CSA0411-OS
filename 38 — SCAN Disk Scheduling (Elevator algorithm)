@@ -1,0 +1,38 @@
+/* scan_disk.c
+   SCAN scheduling: head moves in one direction servicing requests, then reverses.
+   Compile: gcc scan_disk.c -o scan_disk
+*/
+#include <stdio.h>
+#include <stdlib.h>
+
+int cmp(const void *a, const void *b){ return (*(int*)a - *(int*)b); }
+
+int main(){
+    int n, start, diskSize, dir;
+    printf("Total cylinders (0..max-1): "); scanf("%d",&diskSize);
+    printf("Number of requests: "); scanf("%d",&n);
+    int req[n];
+    for(int i=0;i<n;i++) scanf("%d",&req[i]);
+    printf("Initial head position: "); scanf("%d",&start);
+    printf("Direction (0 = towards 0, 1 = towards max): "); scanf("%d",&dir);
+
+    qsort(req, n, sizeof(int), cmp);
+    int idx = 0;
+    while(idx < n && req[idx] < start) idx++;
+
+    int total = 0;
+    int cur = start;
+    if(dir == 1){
+        // go right: service idx..n-1 then go to end, then reverse
+        for(int i=idx;i<n;i++){ total += abs(req[i]-cur); cur = req[i]; }
+        total += abs((diskSize-1) - cur); cur = diskSize-1;
+        for(int i=idx-1;i>=0;i--){ total += abs(req[i]-cur); cur = req[i]; }
+    } else {
+        // go left: service idx-1..0 then to 0 then reverse
+        for(int i=idx-1;i>=0;i--){ total += abs(req[i]-cur); cur = req[i]; }
+        total += abs(cur - 0); cur = 0;
+        for(int i=idx;i<n;i++){ total += abs(req[i]-cur); cur = req[i]; }
+    }
+    printf("Total head movement = %d\n", total);
+    return 0;
+}
