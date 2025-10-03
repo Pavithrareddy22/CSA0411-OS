@@ -1,0 +1,56 @@
+/* myls.c
+   Minimal ls-like program: list directory contents, supports -a and -l
+   Compile: gcc myls.c -o myls
+*/
+#include <stdio.h>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <pwd.h>
+#include <grp.h>
+#include <time.h>
+#include <string.h>
+#include <stdlib.h>
+
+void print_long(const char *path, const char *name){
+    char full[1024];
+    snprintf(full, sizeof(full), "%s/%s", path, name);
+    struct stat st;
+    if(lstat(full, &st) == -1) { perror("stat"); return; }
+    printf( (S_ISDIR(st.st_mode)) ? "d" : "-" );
+    printf( (st.st_mode & S_IRUSR) ? "r":"-" );
+    printf( (st.st_mode & S_IWUSR) ? "w":"-" );
+    printf( (st.st_mode & S_IXUSR) ? "x":"-" );
+    printf( (st.st_mode & S_IRGRP) ? "r":"-" );
+    printf( (st.st_mode & S_IWGRP) ? "w":"-" );
+    printf( (st.st_mode & S_IXGRP) ? "x":"-" );
+    printf( (st.st_mode & S_IROTH) ? "r":"-" );
+    printf( (st.st_mode & S_IWOTH) ? "w":"-" );
+    printf( (st.st_mode & S_IXOTH) ? "x":"-" );
+    printf(" %ld %s %s %5lld ", (long)st.st_nlink,
+           getpwuid(st.st_uid)->pw_name,
+           getgrgid(st.st_gid)->gr_name,
+           (long long)st.st_size);
+    char tbuf[64]; strftime(tbuf, sizeof(tbuf), "%b %d %H:%M", localtime(&st.st_mtime));
+    printf("%s %s\n", tbuf, name);
+}
+
+int main(int argc, char *argv[]){
+    int show_all=0, long_fmt=0;
+    const char *path = ".";
+    for(int i=1;i<argc;i++){
+        if(strcmp(argv[i],"-a")==0) show_all=1;
+        else if(strcmp(argv[i],"-l")==0) long_fmt=1;
+        else path = argv[i];
+    }
+    DIR *d = opendir(path);
+    if(!d){ perror("opendir"); return 1; }
+    struct dirent *e;
+    while((e = readdir(d)) != NULL){
+        if(!show_all && e->d_name[0]=='.') continue;
+        if(long_fmt) print_long(path, e->d_name);
+        else printf("%s  ", e->d_name);
+    }
+    if(!long_fmt) printf("\n");
+    closedir(d);
+    return 0;
+}
