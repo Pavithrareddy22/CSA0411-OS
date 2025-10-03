@@ -1,0 +1,28 @@
+/* best_fit.c
+   Compile: gcc best_fit.c -o best_fit
+*/
+#include <stdio.h>
+#define MAXB 50
+int main(){
+    int n, m;
+    int block[MAXB], proc[MAXB], alloc[MAXB];
+    printf("Number of blocks: "); if(scanf("%d",&n)!=1) return 1;
+    printf("Enter block sizes:\n"); for(int i=0;i<n;i++) scanf("%d",&block[i]);
+    printf("Number of processes: "); scanf("%d",&m);
+    printf("Enter process sizes:\n"); for(int i=0;i<m;i++) scanf("%d",&proc[i]);
+    for(int i=0;i<n;i++) alloc[i] = -1;
+    for(int i=0;i<m;i++){
+        int best = -1;
+        for(int j=0;j<n;j++){
+            if(alloc[j]==-1 && block[j] >= proc[i]){
+                if(best==-1 || block[j] < block[best]) best = j;
+            }
+        }
+        if(best!=-1){
+            alloc[best]=i;
+            block[best]-=proc[i];
+            printf("Process %d (size %d) -> block %d (left %d)\n", i, proc[i], best, block[best]);
+        } else printf("Process %d (size %d) -> Not allocated\n", i, proc[i]);
+    }
+    return 0;
+}
