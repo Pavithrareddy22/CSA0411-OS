@@ -1,0 +1,54 @@
+/* perms_demo.c
+   Show file permission bits and explain user types (owner/group/others, suid/sgid/sticky).
+   Compile: gcc perms_demo.c -o perms_demo
+   Usage: ./perms_demo <path-to-file>
+*/
+#define _XOPEN_SOURCE 700
+#include <stdio.h>
+#include <sys/stat.h>
+#include <pwd.h>
+#include <grp.h>
+#include <stdlib.h>
+
+void print_perms(mode_t m){
+    char p[10];
+    p[0] = (m & S_IRUSR) ? 'r' : '-';
+    p[1] = (m & S_IWUSR) ? 'w' : '-';
+    p[2] = (m & S_IXUSR) ? 'x' : '-';
+    p[3] = (m & S_IRGRP) ? 'r' : '-';
+    p[4] = (m & S_IWGRP) ? 'w' : '-';
+    p[5] = (m & S_IXGRP) ? 'x' : '-';
+    p[6] = (m & S_IROTH) ? 'r' : '-';
+    p[7] = (m & S_IWOTH) ? 'w' : '-';
+    p[8] = (m & S_IXOTH) ? 'x' : '-';
+    p[9] = '\0';
+    printf("%s", p);
+    // special bits
+    if(m & S_ISUID) printf(" (set-user-ID on execute)");
+    if(m & S_ISGID) printf(" (set-group-ID on execute)");
+    if(m & S_ISVTX) printf(" (sticky bit)");
+    printf("\n");
+}
+
+int main(int argc, char *argv[]){
+    if(argc!=2){ printf("Usage: %s <file>\n", argv[0]); return 1; }
+    struct stat st;
+    if(stat(argv[1], &st) != 0){ perror("stat"); return 1; }
+
+    struct passwd *pw = getpwuid(st.st_uid);
+    struct group  *gr = getgrgid(st.st_gid);
+    printf("File: %s\nOwner UID: %d (%s)\nGroup GID: %d (%s)\n",
+           argv[1], (int)st.st_uid, pw ? pw->pw_name : "?", (int)st.st_gid, gr ? gr->gr_name : "?");
+    printf("Permissions (owner/group/others): ");
+    print_perms(st.st_mode);
+
+    printf("\nExplanation of user types and permissions:\n");
+    printf(" - Owner: user who owns the file; has owner (user) permission bits.\n");
+    printf(" - Group: users in the file's group; have group permission bits.\n");
+    printf(" - Others: all other users; have other permission bits.\n");
+    printf("Special bits:\n");
+    printf(" - set-user-ID (suid): executable runs with file owner's privileges.\n");
+    printf(" - set-group-ID (sgid): executable runs with file group's privileges or on directories, files inherit group.\n");
+    printf(" - sticky bit: on directories prevents deletion by non-owners (e.g., /tmp)\n");
+    return 0;
+}
