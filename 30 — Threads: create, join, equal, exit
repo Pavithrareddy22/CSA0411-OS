@@ -1,0 +1,36 @@
+/* thread_demo.c
+   Demonstrates thread create, join, equal, exit
+   Compile: gcc thread_demo.c -pthread -o thread_demo
+*/
+#include <stdio.h>
+#include <pthread.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+void *worker(void *arg){
+    pthread_t self = pthread_self();
+    printf("Worker thread running. pthread_self=%lu\n", (unsigned long)self);
+    sleep(1);
+    pthread_exit((void*) (size_t)42); // exit with value 42
+    return NULL;
+}
+
+int main(){
+    pthread_t t;
+    if(pthread_create(&t, NULL, worker, NULL) != 0){ perror("pthread_create"); return 1; }
+    printf("Main thread created worker %lu\n", (unsigned long)t);
+
+    // create another thread to compare equality
+    pthread_t t2 = t; // mimic scenario
+    if(pthread_equal(t, t2)) printf("pthread_equal: threads are equal\n");
+    else printf("pthread_equal: threads differ\n");
+
+    void *ret;
+    if(pthread_join(t, &ret) != 0){ perror("pthread_join"); return 1; }
+    printf("Worker joined, returned %ld\n", (long)ret);
+
+    // demonstrate pthread_exit in main (not necessary; just show usage)
+    // Note: If main calls pthread_exit, process continues until other threads finish.
+    // We'll not call pthread_exit here to allow normal exit.
+    return 0;
+}
