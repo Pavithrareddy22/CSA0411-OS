@@ -1,0 +1,27 @@
+/* first_fit.c
+   Compile: gcc first_fit.c -o first_fit
+*/
+#include <stdio.h>
+#define MAX 50
+int main(){
+    int n,m;
+    int block[MAX], proc[MAX], alloc[MAX];
+    printf("Enter number of blocks: "); if(scanf("%d",&n)!=1) return 1;
+    printf("Enter block sizes:\n"); for(int i=0;i<n;i++) scanf("%d",&block[i]);
+    printf("Enter number of processes: "); scanf("%d",&m);
+    printf("Enter process sizes:\n"); for(int i=0;i<m;i++) scanf("%d",&proc[i]);
+    for(int i=0;i<n;i++) alloc[i] = -1;
+    for(int i=0;i<m;i++){
+        int placed = 0;
+        for(int j=0;j<n && !placed;j++){
+            if(alloc[j]==-1 && block[j] >= proc[i]){
+                alloc[j]=i;
+                block[j]-=proc[i];
+                placed = 1;
+                printf("Process %d (size %d) -> block %d (left %d)\n", i, proc[i], j, block[j]);
+            }
+        }
+        if(!placed) printf("Process %d (size %d) -> Not allocated\n", i, proc[i]);
+    }
+    return 0;
+}
