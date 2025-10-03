@@ -1,0 +1,24 @@
+/* fcfs_disk.c
+   Simulate FCFS disk scheduling and compute total head movement.
+   Compile: gcc fcfs_disk.c -o fcfs_disk
+*/
+#include <stdio.h>
+
+int main(){
+    int n, start;
+    printf("Number of requests: "); scanf("%d",&n);
+    int req[n];
+    printf("Enter requests (cylinder numbers):\n");
+    for(int i=0;i<n;i++) scanf("%d",&req[i]);
+    printf("Initial head position: "); scanf("%d",&start);
+    int cur = start;
+    int total = 0;
+    printf("Service order: %d ", cur);
+    for(int i=0;i<n;i++){
+        total += abs(req[i] - cur);
+        cur = req[i];
+        printf("%d ", cur);
+    }
+    printf("\nTotal head movement = %d\n", total);
+    return 0;
+}
