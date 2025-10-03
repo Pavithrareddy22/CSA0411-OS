@@ -1,0 +1,43 @@
+/* worst_fit.c
+   Simple simulation of Worst-Fit memory allocation.
+   Compile: gcc worst_fit.c -o worst_fit
+*/
+#include <stdio.h>
+
+#define MAX_BLOCKS 10
+#define MAX_PROCESSES 10
+
+int main() {
+    int blocks, processes;
+    int blockSize[MAX_BLOCKS], alloc[MAX_BLOCKS];
+    int procSize[MAX_PROCESSES];
+
+    printf("Enter number of blocks: ");
+    if(scanf("%d",&blocks)!=1) return 1;
+    printf("Enter sizes of %d blocks:\n", blocks);
+    for(int i=0;i<blocks;i++){ scanf("%d",&blockSize[i]); alloc[i]= -1; }
+
+    printf("Enter number of processes: ");
+    scanf("%d",&processes);
+    printf("Enter sizes of %d processes:\n", processes);
+    for(int i=0;i<processes;i++) scanf("%d",&procSize[i]);
+
+    for(int i=0;i<processes;i++){
+        int worstIndex = -1;
+        for(int j=0;j<blocks;j++){
+            if(alloc[j] == -1 && blockSize[j] >= procSize[i]) {
+                if(worstIndex == -1 || blockSize[j] > blockSize[worstIndex])
+                    worstIndex = j;
+            }
+        }
+        if(worstIndex != -1) {
+            alloc[worstIndex] = i;
+            blockSize[worstIndex] -= procSize[i];
+            printf("Process %d (size %d) allocated to block %d, remaining block size %d\n",
+                   i, procSize[i], worstIndex, blockSize[worstIndex]);
+        } else {
+            printf("Process %d (size %d) not allocated\n", i, procSize[i]);
+        }
+    }
+    return 0;
+}
