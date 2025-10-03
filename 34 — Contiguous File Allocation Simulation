@@ -1,0 +1,22 @@
+/* contiguous_alloc.c
+   Simulate contiguous allocation where file records are stored sequentially.
+   Reading record k requires reading 0..k sequentially (simulate cost).
+   Compile: gcc contiguous_alloc.c -o contiguous_alloc
+*/
+#include <stdio.h>
+
+int main(){
+    int diskSize, fileStart, fileLen, reqIndex;
+    printf("Total disk blocks available: "); scanf("%d",&diskSize);
+    printf("Allocate file starting block (0-based): "); scanf("%d",&fileStart);
+    printf("File length (blocks): "); scanf("%d",&fileLen);
+    if(fileStart + fileLen > diskSize){ printf("Not enough space.\n"); return 1; }
+    printf("Enter record index to access (0-based within file): "); scanf("%d",&reqIndex);
+    if(reqIndex < 0 || reqIndex >= fileLen){ printf("Invalid record index.\n"); return 1; }
+    printf("Simulating read of record %d. You must read %d records sequentially:\n", reqIndex, reqIndex+1);
+    for(int i=0;i<=reqIndex;i++){
+        printf("Read block %d (file offset %d)\n", fileStart + i, i);
+    }
+    printf("Total blocks read = %d\n", reqIndex+1);
+    return 0;
+}
