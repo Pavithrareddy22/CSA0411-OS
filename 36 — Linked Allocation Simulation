@@ -1,0 +1,32 @@
+/* linked_alloc.c
+   Simulate linked allocation: each block contains pointer to next.
+   Compile: gcc linked_alloc.c -o linked_alloc
+*/
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Block {
+    int id;
+    int next; // -1 for end
+} Block;
+
+int main(){
+    int n;
+    printf("Number of blocks allocated for file: "); scanf("%d",&n);
+    Block *blocks = malloc(sizeof(Block)*n);
+    printf("Enter blocks as pairs (id next_index_or_-1). Use indices 0..n-1 for next:\n");
+    for(int i=0;i<n;i++) scanf("%d %d",&blocks[i].id,&blocks[i].next);
+    int startIndex;
+    printf("Starting block index (0-based): "); scanf("%d",&startIndex);
+    printf("Traverse file via links:\n");
+    int cur = startIndex;
+    int steps = 0;
+    while(cur != -1 && steps < n){
+        printf("Block id=%d -> ", blocks[cur].id);
+        cur = blocks[cur].next;
+        steps++;
+    }
+    printf("END\n");
+    free(blocks);
+    return 0;
+}
