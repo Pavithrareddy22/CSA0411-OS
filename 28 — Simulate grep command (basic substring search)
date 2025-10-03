@@ -1,0 +1,25 @@
+/* mygrep.c
+   Minimal grep: search pattern in a file line-by-line and print matching lines
+   Compile: gcc mygrep.c -o mygrep
+   Usage: ./mygrep pattern filename
+*/
+#include <stdio.h>
+#include <string.h>
+
+int main(int argc, char *argv[]){
+    if(argc!=3){ fprintf(stderr,"Usage: %s pattern filename\n", argv[0]); return 1; }
+    const char *pat = argv[1];
+    FILE *f = fopen(argv[2],"r");
+    if(!f){ perror("fopen"); return 1; }
+    char *line = NULL;
+    size_t len=0;
+    ssize_t read;
+    long lineno = 0;
+    while((read = getline(&line, &len, f)) != -1){
+        lineno++;
+        if(strstr(line, pat)) printf("%s:%ld:%s", argv[2], lineno, line);
+    }
+    free(line);
+    fclose(f);
+    return 0;
+}
